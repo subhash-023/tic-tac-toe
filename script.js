@@ -1,4 +1,4 @@
-function GameBoard() {
+const GameBoard = (function () {
     const gameBoard = []
     const rows = 3
     const columns = 3
@@ -21,12 +21,22 @@ function GameBoard() {
         console.log(boardWithCellValues)
     }
 
+    const resetBoard = () => {
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < columns; j++) {
+                gameBoard[i][j].updateValue(0);
+            }
+        }
+        return gameBoard
+    };
+
     return {
         getBoard,
         addMarker,
-        printBoard
+        printBoard,
+        resetBoard
     }
-}
+})()
 
 function Cell() {
     let value = 0;
@@ -43,20 +53,20 @@ function Cell() {
     }
 }
 
-function GameController() {
+const Game = (function GameController() {
 
     const players = [
         {
-            name: "playerOne",
+            name: "PlayerOne",
             marker: 1
         },
         {
-            name: "playerTwo",
+            name: "PlayerTwo",
             marker: 2
         }
     ]
 
-    const boardInstance = GameBoard()
+    // const boardInstance = GameBoard()
 
     let activePlayer = players[0]
 
@@ -100,37 +110,96 @@ function GameController() {
 
     const playRound = (row, column) => {
 
-        const board = boardInstance.getBoard();
+        const board = GameBoard.getBoard();
         if (board[row][column].getValue() !== 0) {
             console.log("Cell already occupied!");
             return;
         }
 
-        boardInstance.addMarker(row, column, getActivePlayer().marker)
+        GameBoard.addMarker(row, column, getActivePlayer().marker)
 
         switchActivePlayer()
 
-        boardInstance.printBoard()
+        // if(checkWinner(GameBoard) !== null){
+        //     resetActivePlayer()
+        // }
 
-        console.log(checkWinner(board))
+        GameBoard.printBoard()
+
+        // console.log(checkWinner(board))
+    }
+
+    const resetActivePlayer = () => {
+        activePlayer = players[0]
     }
 
     return {
         getActivePlayer,
         checkWinner,
-        playRound
+        playRound,
+        resetActivePlayer
     }
+})()
+
+function displayController(board) {
+
+    const grid_container = document.getElementById("grid-container")
+    const turn_div = document.getElementById("turn")
+    const resetBtn = document.getElementById("reset-btn")
+    let emptyCellCount = 0
+    
+    grid_container.innerHTML = ""
+
+
+    board.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+
+            const gridSquare = document.createElement("button")
+            gridSquare.classList.add("gridSquare")
+
+            turn_div.innerHTML = `${Game.getActivePlayer().name}'s turn`
+
+            if(cell.getValue() == 0){
+                gridSquare.textContent = ""
+                emptyCellCount++
+            }
+            if(cell.getValue() == 1){
+                gridSquare.textContent = "X"
+            }
+            if(cell.getValue() == 2){
+                gridSquare.textContent = "O"
+            }
+
+            grid_container.appendChild(gridSquare)
+            if(Game.checkWinner(GameBoard.getBoard()) === null){
+                gridSquare.addEventListener("click", () => {
+                    handleClickEvent(rowIndex, colIndex)
+                })
+            }
+            if(emptyCellCount === 0){
+                turn_div.textContent = "Match Drawn"
+            }
+        })
+    });
+
+    function handleClickEvent(rowIndex, colIndex){
+        Game.playRound(rowIndex, colIndex)
+        displayController(GameBoard.getBoard())
+        winner = Game.checkWinner(GameBoard.getBoard())
+        if(winner != null) {
+            if(winner.getValue() == 1){
+                turn_div.textContent = 'PlayerOne won'
+            }
+            else{
+                turn_div.textContent = 'PlayerTwo won'
+            }
+        }
+    }
+
+    resetBtn.addEventListener("click", () => {
+        Game.resetActivePlayer()
+        displayController(GameBoard.resetBoard())
+    })
 }
 
-// test = GameController()
-// test.playRound(1, 0)
-
-// test.playRound(0, 1)
-
-// test.playRound(1, 1)
-
-// test.playRound(0, 2)
-
-// test.playRound(1, 2)
-
-
+displayController(GameBoard.getBoard())

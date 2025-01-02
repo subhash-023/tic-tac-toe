@@ -1,0 +1,28 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  margin: 0;
+}
+
+#grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 100px); /* Example: 3x3 grid */
+  grid-template-rows: repeat(3, 100px);
+  gap: 10px;
+}
+
+#turn {
+  margin-bottom: 20px; /* Space between the turn indicator and the grid */
+  font-size: 1.5rem;
+}
+
+#reset-btn {
+  margin-top: 20px;
+  border-radius: 10px;
+  padding: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
